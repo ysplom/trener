@@ -1,0 +1,52 @@
+#include <LiquidCrystal.h>
+
+// Определение пинов для ЖК-дисплея
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // (RS, RW, E, D4, D5, D6)
+
+// Определение пинов для кнопки
+const int buttonPin = 6; // Пин кнопки
+
+int inputNumber = 0; // Переменная для хранения введенного числа
+
+void setup() {
+    lcd.begin(16, 2); // Инициализация ЖК-дисплея
+    pinMode(buttonPin, INPUT_PULLUP); // Настройка кнопки
+    lcd.print("Введите 1-5:"); // Сообщение на дисплее
+}
+
+void loop() {
+    if (digitalRead(buttonPin) == LOW) { // Если кнопка нажата
+        inputNumber++; // Увеличиваем число
+        if (inputNumber > 5) {
+            inputNumber = 1; // Сброс к 1, если больше 5
+        }
+        displayNumber(inputNumber); // Отображаем число
+        delay(1000); // Задержка для предотвращения многократного считывания
+    }
+}
+
+void displayNumber(int number) {
+    lcd.clear(); // Очистка дисплея
+    lcd.print("Вы ввели: ");
+    
+    switch (number) {
+        case 1:
+            lcd.print("Один");
+            break;
+        case 2:
+            lcd.print("Два");
+            break;
+        case 3:
+            lcd.print("Три");
+            break;
+        case 4:
+            lcd.print("Четыре");
+            break;
+        case 5:
+            lcd.print("Пять");
+            break;
+        default:
+            lcd.print("Ошибка");
+            break;
+    }
+}

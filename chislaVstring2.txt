@@ -1,0 +1,61 @@
+#include <LiquidCrystal.h>
+
+// Определение пинов для ЖК-дисплея
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // (RS, RW, E, D4, D5, D6)
+
+// Определение пина для кнопки
+const int buttonPin = 6; // Пин кнопки
+
+int inputNumber = 1; // Переменная для хранения введенного числа
+int staticNumber1 = 3; // Первое статическое число
+int staticNumber2 = 7; // Второе статическое число
+
+void setup() {
+    lcd.begin(16, 2); // Инициализация ЖК-дисплея
+    pinMode(buttonPin, INPUT_PULLUP); // Настройка кнопки
+    lcd.print("Нажмите кнопку"); // Сообщение на дисплее
+}
+
+void loop() {
+    if (digitalRead(buttonPin) == LOW) { // Если кнопка нажата
+        inputNumber++; // Увеличиваем число
+        if (inputNumber > 5) {
+            inputNumber = 1; // Сброс к 1, если больше 5
+        }
+        displayNumber(inputNumber); // Отображаем число
+        delay(1000); // Задержка для предотвращения многократного считывания
+    }
+}
+
+void displayNumber(int number) {
+    lcd.clear(); // Очистка дисплея
+    lcd.print("Вы ввели: ");
+    
+    // Выводим число в буквенном выражении
+    switch (number) {
+        case 1:
+            lcd.print("Один");
+            break;
+        case 2:
+            lcd.print("Два");
+            break;
+        case 3:
+            lcd.print("Три");
+            break;
+        case 4:
+            lcd.print("Четыре");
+            break;
+        case 5:
+            lcd.print("Пять");
+            break;
+        default:
+            lcd.print("Ошибка");
+            break;
+    }
+    
+    // Переходим на вторую строку для вывода статических чисел
+    lcd.setCursor(0, 1); // Переход на вторую строку
+    lcd.print(staticNumber1); // Вывод первого статического числа
+    lcd.print(" "); // Пробел между числами
+    lcd.print(staticNumber2); // Вывод второго статического числа
+}

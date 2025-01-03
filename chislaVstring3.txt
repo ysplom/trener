@@ -1,0 +1,70 @@
+#include <LiquidCrystal.h>
+
+// Определение пинов для ЖК-дисплея
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // (RS, RW, E, D4, D5, D6)
+
+// Определение пинов для кнопок
+const int button1Pin = 6; // Переключение ключей
+const int button2Pin = 7; // Изменение значений
+
+int currentKey = 0; // Текущий ключ (0, 1 или 2)
+int currentValue[3][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0} }; // Значения для 3 ключей и 3 слотов
+int slotIndex = 0; // Индекс слота для изменения значений (всегда 0)
+
+void setup() {
+    lcd.begin(16, 2); // Инициализация ЖК-дисплея
+    pinMode(button1Pin, INPUT_PULLUP); // Настройка первой кнопки
+    pinMode(button2Pin, INPUT_PULLUP); // Настройка второй кнопки
+    updateDisplay(); // Отображаем начальное состояние
+}
+
+void loop() {
+    // Проверка состояния первой кнопки
+    if (digitalRead(button1Pin) == LOW) {
+        delay(200); // Задержка для устранения дребезга кнопки
+        if (currentKey < 2) {
+            currentKey++; // Переход к следующему ключу
+        } else {
+            currentKey = 0; // Сброс к первому ключу
+        }
+        updateDisplay(); // Обновляем дисплей
+    }
+
+    // Проверка состояния второй кнопки
+    if (digitalRead(button2Pin) == LOW) {
+        delay(200); // Задержка для устранения дребезга кнопки
+        if (currentKey < 2) {
+            // Изменяем значение в первом слоте
+            currentValue[currentKey][slotIndex]++;
+            if (currentValue[currentKey][slotIndex] > 9) {
+                currentValue[currentKey][slotIndex] = 0; // Сброс к 0
+            }
+            updateDisplay(); // Обновляем дисплей
+        } else {
+            // Находимся на третьем ключе, выводим значения
+            lcd.clear();
+            lcd.print("Значения: ");
+            for (int i = 0; i < 3; i++) {
+                lcd.print(currentValue[i][0]); // Печатаем первое значение каждого ключа
+                if (i < 2) {
+                    lcd.print(" + ");
+                }
+            }
+            delay(2000); // Задержка, чтобы показать значения
+            updateDisplay(); // Возврат к дисплею
+        }
+    }
+}
+
+void updateDisplay() {
+    lcd.clear();
+    lcd.print("Ключ "); 
+    switch (currentKey) {
+        case 0: lcd.print("Первый"); break;
+        case 1: lcd.print("Второй"); break;
+        case 2: lcd.print("Третий"); break;
+    }
+    lcd.setCursor(0, 1); // Переход на вторую строку
+    lcd.print("Знач: ");
+    lcd.print(currentValue[currentKey][slotIndex]); // Печать значения первого слота
+}

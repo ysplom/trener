@@ -1,0 +1,99 @@
+#include <LiquidCrystal.h>
+
+// Определение пинов для ЖК-дисплея
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // (RS, RW, E, D4, D5, D6)
+
+// Определение пинов для кнопок
+const int button1Pin = 6;  // Первая кнопка
+const int button2Pin = 7;  // Вторая кнопка
+
+// Переменные для управления состоянием
+int currentLevel = 1; // Текущий уровень (1, 2 или 3)
+int currentSlot = 1;  // Текущий слот (1, 2 или 3)
+int values[3][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0} }; // Значения для каждого слота на каждом уровне
+
+// Переменные для хранения состояния кнопок
+bool lastButton1State = HIGH;
+bool lastButton2State = HIGH;
+
+void setup() {
+    lcd.begin(16, 2); // Инициализация ЖК-дисплея
+    pinMode(button1Pin, INPUT_PULLUP); // Кнопка 1
+    pinMode(button2Pin, INPUT_PULLUP); // Кнопка 2
+    updateDisplay(); // Обновление дисплея в начале
+}
+
+void loop() {
+    // Чтение состояния кнопок
+    bool button1State = digitalRead(button1Pin);
+    bool button2State = digitalRead(button2Pin);
+
+    // Обработка нажатия первой кнопки
+    if (lastButton1State == HIGH && button1State == LOW) {
+        if (currentSlot == 1) {
+            // Переключение уровней
+            if (currentLevel == 3) {
+                currentLevel = 1; // Возврат к первому уровню
+            } else {
+                currentLevel++;
+            }
+        } else {
+            // В первом слоте значения не изменяются
+        }
+        updateDisplay(); // Обновление дисплея
+        delay(200); // Антидребезг
+    }
+
+    // Обработка нажатия второй кнопки
+    if (lastButton2State == HIGH && button2State == LOW) {
+        if (currentLevel == 3) {
+            // Вывод значений при нахождении на 3 уровне
+            lcd.clear();
+            lcd.print("Слот 1: ");
+            lcd.print(values[0][1]); // Значение 1 уровня 2 слота
+            lcd.print(" + ");
+            lcd.print(values[1][1]); // Значение 2 уровня 2 слота
+            lcd.print(" = ");
+            lcd.println(values[0][1] + values[1][1]);
+
+            lcd.print("Слот 2: ");
+            lcd.print(values[0][2]); // Значение 1 уровня 3 слота
+            lcd.print(" + ");
+            lcd.print(values[1][2]); // Значение 2 уровня 3 слота
+            lcd.print(" = ");
+            lcd.println(values[0][2] + values[1][2]);
+
+            lcd.print("Слот 3: ");
+            lcd.print(values[0][0]); // Значение 1 уровня 1 слота
+            lcd.print(" + ");
+            lcd.print(values[1][0]); // Значение 2 уровня 1 слота
+            lcd.print(" = ");
+            lcd.println(values[0][0] + values[1][0]);
+        } else {
+            // Переключение слотов
+            currentSlot++;
+            if (currentSlot > 3) {
+                currentSlot = 1; // Возврат к первому слоту
+            }
+            // Изменение значений в текущем слоте (2 и 3)
+            if (currentSlot > 1) {
+                values[currentLevel - 1][currentSlot - 1] = (values[currentLevel - 1][currentSlot - 1] + 1) % 10; // Изменение значения от 0 до 9
+            }
+        }
+        updateDisplay(); // Обновление дисплея
+        delay(200); // Антидребезг
+    }
+
+    // Обновление состояния кнопок
+    lastButton1State = button1State;
+    lastButton2State = button2State;
+}
+
+void updateDisplay() {
+    lcd.clear();
+    lcd.print("Уровень: ");
+    lcd.print(currentLevel);
+    lcd.setCursor(0, 1); // Переход на вторую строку
+    lcd.print("Слот: ");
+    lcd.print(currentSlot);
+}
